@@ -12,7 +12,7 @@ export function Map() {
     const { latMax, latMin, lonMin, lonMax } = boundingBox(
       location.coords.latitude,
       location.coords.longitude,
-      1000,
+      5,
     )
 
     return (
@@ -26,7 +26,7 @@ export function Map() {
           }}
           style={$map}
         >
-        <MapMarkers {...{latMin, lonMin, latMax, lonMax}} />
+          <MapMarkers {...{ latMin, lonMin, latMax, lonMax }} />
         </MapView>
       )
     )
