@@ -6,5 +6,6 @@
  * https://reactnative.dev/docs/security#storing-sensitive-info
  */
 export default {
-  API_URL: "CHANGEME",
+  API_URL: "https://airlabs.co/api/v9/",
+  API_KEY: "8bd51ace-68d6-41dd-906a-c88878e2b9b9"
 }

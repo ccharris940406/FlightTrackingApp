@@ -1,42 +1,61 @@
 import { observer } from "mobx-react-lite"
-import React, { FC } from "react"
-import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
+import React, { FC, useState } from "react"
 import {
-  Text,
-} from "app/components"
-import { isRTL } from "../i18n"
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from "react-native"
 import { AppStackScreenProps } from "../navigators"
-import { colors, spacing } from "../theme"
-import { useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
-
-const welcomeLogo = require("../../assets/images/logo.png")
-const welcomeFace = require("../../assets/images/welcome-face.png")
+import { colors } from "../theme"
+import { Map, SearchForm, Text, searchParamsType } from "app/components"
+import { TouchableWithoutFeedback } from "react-native-gesture-handler"
+import FligthInfoWrapper, { FligthInfoWrapperProps } from "app/components/FligthInfoWrapper"
+import NearFlightsListWrapper from "app/components/NearFlightsListWrapper"
 
 interface WelcomeScreenProps extends AppStackScreenProps<"Welcome"> {}
 
-export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeScreen(
-) {
+export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeScreen() {
+  const [value, setValue] = useState<FligthInfoWrapperProps | undefined>(undefined)
 
-  const $bottomContainerInsets = useSafeAreaInsetsStyle(["bottom"])
+  const handleSearch = (value: string, param: searchParamsType) => {
+    setValue({
+      value,
+      param,
+    })
+  }
 
-  return (
-    <View style={$container}>
-      <View style={$topContainer}>
-        <Image style={$welcomeLogo} source={welcomeLogo} resizeMode="contain" />
-        <Text
-          testID="welcome-heading"
-          style={$welcomeHeading}
-          tx="welcomeScreen.readyForLaunch"
-          preset="heading"
-        />
-        <Text tx="welcomeScreen.exciting" preset="subheading" />
-        <Image style={$welcomeFace} source={welcomeFace} resizeMode="contain" />
+  return (<>
+    <KeyboardAvoidingView
+      style={$container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <View style={$mapContainer}>
+        <Map />
+      </View>
+      <TouchableWithoutFeedback style={$searchFormContainer} onPress={Keyboard.dismiss}>
+        <View style={$searchFormContainer}>
+          <SearchForm onSearch={handleSearch} />
+        </View>
+      </TouchableWithoutFeedback>
+      <View style={$fligthsListContainer}>
+        <NearFlightsListWrapper />
       </View>
 
-      <View style={[$bottomContainer, $bottomContainerInsets]}>
-        <Text tx="welcomeScreen.postscript" size="md" />
-      </View>
-    </View>
+    </KeyboardAvoidingView>
+      <Modal transparent={true} visible={!!value} onRequestClose={() => setValue(undefined)}>
+        <View style={$modalViewContainer}>
+          <View style={$modalView}>
+            {!!value && <FligthInfoWrapper {...value} />}
+            <TouchableOpacity style={$buttonModal} onPress={() => setValue(undefined)}>
+              <Text text="Ok" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal></>
   )
 })
 
@@ -45,39 +64,43 @@ const $container: ViewStyle = {
   backgroundColor: colors.background,
 }
 
-const $topContainer: ViewStyle = {
+const $mapContainer: ViewStyle = {
   flexShrink: 1,
-  flexGrow: 1,
-  flexBasis: "57%",
+  flexBasis: "45%",
   justifyContent: "center",
-  paddingHorizontal: spacing.lg,
 }
 
-const $bottomContainer: ViewStyle = {
-  flexShrink: 1,
-  flexGrow: 0,
-  flexBasis: "43%",
+const $fligthsListContainer: ViewStyle = {
+  flex: 1,
   backgroundColor: colors.palette.neutral100,
-  borderTopLeftRadius: 16,
-  borderTopRightRadius: 16,
-  paddingHorizontal: spacing.lg,
   justifyContent: "space-around",
 }
-const $welcomeLogo: ImageStyle = {
-  height: 88,
-  width: "100%",
-  marginBottom: spacing.xxl,
+
+const $searchFormContainer: ViewStyle = {}
+
+const $modalViewContainer: ViewStyle = {
+  display: "flex",
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  marginTop: 22,
 }
 
-const $welcomeFace: ImageStyle = {
-  height: 169,
-  width: 269,
-  position: "absolute",
-  bottom: -47,
-  right: -80,
-  transform: [{ scaleX: isRTL ? -1 : 1 }],
+const $modalView: ViewStyle = {
+  backgroundColor: "#f4f4f4",
+  shadowColor: colors.text,
+  shadowRadius: 2,
+  shadowOpacity: 0.8,
+  shadowOffset: { width: 2, height: 1 },
+  elevation: 9,
+  width: "90%",
+  display: "flex",
+  margin: 20,
+  borderRadius: 5,
+  padding: 20,
 }
 
-const $welcomeHeading: TextStyle = {
-  marginBottom: spacing.md,
+const $buttonModal: ViewStyle = {
+  alignSelf: "center",
 }
+
